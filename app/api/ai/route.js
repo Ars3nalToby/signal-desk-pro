@@ -1,5 +1,6 @@
 import { generate } from "../../../lib/gemini";
 import { PERSONA, TASKS } from "../../../lib/prompts";
+import { gatherNews, newsBlock } from "../../../lib/rss";
 
 export const runtime = "nodejs";
 export const maxDuration = 60; // Vercel 免费版最多 60 秒
@@ -11,6 +12,39 @@ function extractJSON(text) {
   const e = clean.lastIndexOf("}");
   if (s === -1 || e === -1) throw new Error("AI 没有返回可读的结果，请重试");
   return JSON.parse(clean.slice(s, e + 1));
+}
+
+const HOTSCAN_QUERIES = [
+  "stock market when:2d",
+  "ASX when:2d",
+  "commodities prices when:2d",
+  "AI chips data centre when:2d",
+  "central bank interest rates when:2d",
+  "China economy when:2d",
+];
+
+// 用 Flash-Lite（每天 500 次）把用户的中文描述变成 2–4 个英文新闻搜索词
+async function buildQueries(key, task, payload) {
+  if (task === "hotscan") {
+    return payload.focus ? [`${payload.focus} when:2d`, ...HOTSCAN_QUERIES.slice(0, 4)] : HOTSCAN_QUERIES;
+  }
+  const subject = payload.headline || payload.signal || payload.theme || "";
+  const companies = (payload.ctx?.valuechain?.companies || []).map((c) => `${c.ticker} ${c.name}`).join(", ");
+  const hint =
+    task === "inst"
+      ? `重点找这些公司的机构持仓/大股东变动/基金增减持新闻：${companies || "（上一步没给公司）"}`
+      : task === "nnscreen"
+      ? "重点找这个主题下的上市公司、订单、产能、合约新闻"
+      : "重点找能确认事实、数字、价格趋势和供需变化的新闻";
+  const prompt = `把下面这个主题变成 3 个 Google News 英文搜索词（简短，2–6 个词，可以带公司名或 ticker）。${hint}
+主题：「${subject}」${payload.market === "asx" ? "（偏澳洲市场）" : ""}
+只输出 JSON：{"queries":["...","...","..."]}`;
+  try {
+    const out = await generate(key, { prompt, lite: true, maxTokens: 300 });
+    const q = extractJSON(out.text).queries;
+    if (Array.isArray(q) && q.length) return q.slice(0, 4).map((x) => `${x} when:30d`);
+  } catch {}
+  return [subject.slice(0, 80)];
 }
 
 export async function POST(req) {
@@ -36,17 +70,28 @@ export async function POST(req) {
   }
   const task = TASKS[body.task];
   if (!task) return Response.json({ error: "unknown task" }, { status: 400 });
+  const payload = body.payload || {};
 
-  const prompt = task.build(body.payload || {});
+  let prompt = task.build(payload);
+  let news = [];
+  if (task.search) {
+    const queries = await buildQueries(key, body.task, payload);
+    news = await gatherNews(queries);
+    prompt += `\n\n━━ 最新新闻标题（服务器刚从 Google News 抓取，今天是 ${new Date().toISOString().slice(0, 10)}）━━
+${newsBlock(news)}
+━━━━
+规则：最新事实只能来自上面的新闻标题；标题里没有的数字/事件，要标注为"未确认"或"来自旧知识"。不要编造新闻。`;
+  }
+
   let lastErr;
-  // 最多试两轮：JSON 解析失败时换下一个模型再来一次
   const skip = [];
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const out = await generate(key, { system: PERSONA, prompt, search: task.search, skip });
+      const out = await generate(key, { system: PERSONA, prompt, skip });
       try {
         const data = extractJSON(out.text);
-        return Response.json({ data, model: out.model, search: task.search, sources: out.sources.slice(0, 8) });
+        const sources = news.slice(0, 8).map((n) => ({ title: `${n.source ? n.source + "：" : ""}${n.title}`, uri: n.link }));
+        return Response.json({ data, model: out.model, search: task.search, newsCount: news.length, sources });
       } catch (e) {
         lastErr = e;
         skip.push(out.model);

@@ -130,10 +130,10 @@ function ChainMapper({ seed, onSave }) {
           <MarketPick v={market} set={setMarket} />
           <span style={{ flex: 1 }} />
           <button className="btn primary" disabled={!headline.trim() || busy} onClick={go}>
-            {busy ? "推演中…" : "推演 (1 次搜索)"}
+            {busy ? "推演中…" : "推演 (1 次 AI)"}
           </button>
         </div>
-        {busy && <Spinner text="搜索事实 → 推演一/二/三阶…" />}
+        {busy && <Spinner text="抓最新新闻 → 推演一/二/三阶…" />}
         <Err msg={err} />
       </div>
       {res && <ChainResult r={res} />}
@@ -279,7 +279,7 @@ function Pipeline({ onSave, onDecide }) {
       <div className="card">
         <div className="card-head">
           <h3>Leto Bao 五步研究</h3>
-          <span className="dim">生活反常 → 曲线 → 结构性 → 产业链卡位 → 机构验证 → 结论。每次完整跑：3 次搜索 + 3 次推理</span>
+          <span className="dim">生活反常 → 曲线 → 结构性 → 产业链卡位 → 机构验证 → 结论。每次完整跑：6 次 AI，其中 3 步会先抓最新新闻</span>
         </div>
         <textarea rows={3} placeholder="你在现实里看到的反常：涨价、缺货、排队、供应商说的话…" value={signal} onChange={(e) => setSignal(e.target.value)} />
         <div className="examples">
@@ -316,12 +316,12 @@ function Pipeline({ onSave, onDecide }) {
                 <b>{s.zh}</b>
                 <span className="dim small">{s.q}</span>
                 <span style={{ flex: 1 }} />
-                {s.search && <span className="tag">🔎 搜索</span>}
+                {s.search && <span className="tag">📰 新闻</span>}
                 {score !== undefined && (
                   <span className={`score ${score >= 60 ? "hi" : score >= 40 ? "mid" : "lo"}`}>{score}</span>
                 )}
               </div>
-              {state === "running" && <Spinner text={s.search ? "搜索中…" : "推理中…"} />}
+              {state === "running" && <Spinner text={s.search ? "抓新闻 → 分析中…" : "推理中…"} />}
               {r && (
                 <>
                   <p className="summary">{r.data.summary || r.data.oneLiner}</p>
@@ -385,10 +385,10 @@ function NNScreen({ onSave }) {
           <input placeholder="主题，如：AI 数据中心电力设备、铀、国防、GLP-1 供应链…" value={theme} onChange={(e) => setTheme(e.target.value)} style={{ flex: 1 }} />
           <MarketPick v={market} set={setMarket} />
           <button className="btn primary" disabled={!theme.trim() || busy} onClick={go}>
-            {busy ? "筛选中…" : "筛选 (1 次搜索)"}
+            {busy ? "筛选中…" : "筛选 (1 次 AI)"}
           </button>
         </div>
-        {busy && <Spinner text="搜索候选公司并逐关打分…" />}
+        {busy && <Spinner text="抓新闻 → 找候选公司并逐关打分…" />}
         <Err msg={err} />
       </div>
       {res &&

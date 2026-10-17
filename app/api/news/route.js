@@ -1,4 +1,6 @@
 // 免费新闻：Google News RSS（不耗 AI 额度）。服务器端抓取，避开浏览器跨域限制。
+import { searchNews } from "../../../lib/rss";
+
 export const dynamic = "force-dynamic";
 
 const FEEDS = {
@@ -9,46 +11,11 @@ const FEEDS = {
   crypto: "bitcoin OR solana OR crypto market when:1d",
 };
 
-function decode(s = "") {
-  return s
-    .replace(/<!\[CDATA\[|\]\]>/g, "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .trim();
-}
-
-function parse(xml) {
-  const items = [];
-  const re = /<item>([\s\S]*?)<\/item>/g;
-  let m;
-  while ((m = re.exec(xml)) && items.length < 12) {
-    const block = m[1];
-    const get = (tag) => decode((block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`)) || [])[1]);
-    const title = get("title");
-    const source = get("source");
-    items.push({
-      title: source && title.endsWith(` - ${source}`) ? title.slice(0, -(source.length + 3)) : title,
-      link: get("link"),
-      source,
-      date: get("pubDate"),
-    });
-  }
-  return items;
-}
-
 export async function GET(req) {
   const topic = new URL(req.url).searchParams.get("topic") || "asx";
-  const q = FEEDS[topic] || FEEDS.asx;
-  const url = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en-AU&gl=AU&ceid=AU:en`;
-  try {
-    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 SignalDeskPro" }, next: { revalidate: 600 } });
-    if (!r.ok) throw new Error(`RSS ${r.status}`);
-    const items = parse(await r.text());
-    return Response.json({ topic, items }, { headers: { "Cache-Control": "s-maxage=600, stale-while-revalidate=1200" } });
-  } catch (e) {
-    return Response.json({ topic, items: [], error: e.message });
-  }
+  const items = await searchNews(FEEDS[topic] || FEEDS.asx, { max: 12 });
+  return Response.json(
+    { topic, items, error: items.length ? undefined : "暂时没抓到" },
+    { headers: { "Cache-Control": "s-maxage=600, stale-while-revalidate=1200" } }
+  );
 }

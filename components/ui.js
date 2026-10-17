@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { DAILY_LIMITS, SEARCH_DAILY_TOTAL } from "../lib/models";
+import { DAILY_LIMITS, FLASH_KEYS, LITE_KEYS } from "../lib/models";
 import { getUsage } from "../lib/ai";
 
 export function Priced({ v }) {
@@ -82,27 +82,24 @@ export function QuotaMeter() {
       clearInterval(t);
     };
   }, []);
-  const searchUsed = (u.counts["gemini-2.5-flash"] || 0) + (u.counts["gemini-2.5-flash-lite"] || 0);
-  const flashKeys = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3-flash"];
-  const flashUsed = flashKeys.reduce((a, k) => a + (u.counts[k] || 0), 0);
+  const flashUsed = FLASH_KEYS.reduce((a, k) => a + (u.counts[k] || 0), 0);
+  const liteUsed = LITE_KEYS.reduce((a, k) => a + (u.counts[k] || 0), 0);
   const pct = (a, b) => Math.min(100, Math.round((a / b) * 100));
   return (
     <div className="quota" onClick={() => setOpen(!open)} title="点击看明细">
       <div className="q-row">
-        <span>搜索</span>
-        <div className="bar">
-          <b style={{ width: pct(searchUsed, SEARCH_DAILY_TOTAL) + "%" }} />
-        </div>
-        <span className="mono">
-          {SEARCH_DAILY_TOTAL - searchUsed}/{SEARCH_DAILY_TOTAL}
-        </span>
-      </div>
-      <div className="q-row">
-        <span>推理</span>
+        <span>Flash</span>
         <div className="bar">
           <b style={{ width: pct(flashUsed, 80) + "%" }} />
         </div>
         <span className="mono">{80 - flashUsed}/80</span>
+      </div>
+      <div className="q-row">
+        <span>Lite</span>
+        <div className="bar">
+          <b style={{ width: pct(liteUsed, 1000) + "%" }} />
+        </div>
+        <span className="mono">{1000 - liteUsed}/1000</span>
       </div>
       {open && (
         <div className="q-detail">
@@ -111,7 +108,7 @@ export function QuotaMeter() {
               {k}: {u.counts[k] || 0}/{lim}
             </div>
           ))}
-          <div className="dim">推理用完会自动降到 Flash-Lite（每天 500 次）。额度在布里斯班时间约下午 5 点重置（太平洋时间午夜）。这里只统计这台设备的用量。</div>
+          <div className="dim">主力分析用 Flash（4 个模型各 20 次/天），用完自动降到 Flash-Lite（各 500 次/天）。新闻来自 Google News，不耗额度。额度在布里斯班时间约下午 5 点重置（太平洋时间午夜）。这里只统计这台设备的用量。</div>
         </div>
       )}
     </div>

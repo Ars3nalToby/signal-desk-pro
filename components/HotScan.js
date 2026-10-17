@@ -29,15 +29,15 @@ export default function HotScan({ onMap }) {
       <div className="card">
         <div className="card-head">
           <h3>全球热点扫描</h3>
-          <span className="dim">用 Google 搜索过去 48 小时，按「二阶效应潜力」排序，不是按热度</span>
+          <span className="dim">抓取 Google News 过去 48 小时，AI 按「二阶效应潜力」排序，不是按热度</span>
         </div>
         <div className="row">
           <input placeholder="方向（可选）：如 AI 数据中心、锂、利率、医疗…" value={focus} onChange={(e) => setFocus(e.target.value)} style={{ flex: 1 }} />
           <button className="btn primary" onClick={scan} disabled={busy}>
-            {busy ? "扫描中…" : "扫描 (1 次搜索)"}
+            {busy ? "扫描中…" : "扫描 (1 次 AI)"}
           </button>
         </div>
-        {busy && <Spinner text="Gemini 正在搜索全球新闻…（10–40 秒）" />}
+        {busy && <Spinner text="抓新闻 → Gemini 分析中…（10–40 秒）" />}
         <Err msg={err} />
       </div>
 

@@ -16,10 +16,10 @@
 
 ## 模型分配（`lib/models.js`）
 
-- 需要联网搜索：Gemini 2.5 Flash → 2.5 Flash-Lite（免费层只有 2.x 系列有 search grounding）
-- 纯推理：Gemini 3.8 Flash → 3.7 → 3.6 → 3 Flash → 3.5 Flash-Lite → 3.1 Flash-Lite
+- 最新事实：服务器先抓 Google News RSS（免费、不限次），再交给模型分析。（Gemini 2.5 已不对新项目开放；免费层 Gemini 3+ 没有 Google Search grounding）
+- 分析：Gemini 3.8 Flash → 3.7 → 3.6 → 3 Flash → 3.5 Flash-Lite → 3.1 Flash-Lite；生成新闻搜索词用 Flash-Lite
 - 额度用完（429）或模型名不存在（404）会自动换下一个
-- 每天约可跑 12 次完整五步研究；额度在太平洋时间午夜重置（布里斯班约下午 5–6 点）
+- 每天约可跑 13 次 Flash 级别的完整五步研究，之后自动降到 Flash-Lite；额度在太平洋时间午夜重置（布里斯班约下午 5–6 点）
 
 Google 改额度或模型名时，只改 `lib/models.js`。
 
