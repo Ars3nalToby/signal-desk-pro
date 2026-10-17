@@ -128,6 +128,34 @@ export default function DailyBrief({ onMap }) {
             <p>{b.marketWrap}</p>
           </div>
 
+          {b.geo?.length > 0 && (
+            <div className="card">
+              <div className="card-head">
+                <h3>🌍 政治 / 战争</h3>
+                <span className="dim">只列会影响价格的</span>
+              </div>
+              {b.geo.map((g, i) => (
+                <div className="effect" key={i}>
+                  <div className="row wrap">
+                    <b>{g.title}</b>
+                    <span className={`tag ${g.risk === "high" ? "tag-crowded" : g.risk === "medium" ? "tag-partly" : ""}`}>
+                      {g.risk === "high" ? "高风险" : g.risk === "medium" ? "中风险" : "低风险"}
+                    </span>
+                  </div>
+                  <div className="small">{g.what}</div>
+                  <div className="small">
+                    <span className="label">影响</span>
+                    {g.impact}
+                  </div>
+                  <div className="small">
+                    <span className="label">ASX</span>
+                    {g.asxAngle} <Src ids={g.src} news={b.news} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="card">
             <div className="card-head">
               <h3>🚀 IPO 雷达</h3>
@@ -189,7 +217,7 @@ export default function DailyBrief({ onMap }) {
 
           <div className="card">
             <div className="card-head">
-              <h3>📊 ASX 异动</h3>
+              <h3>📊 ASX 热股 · 异动</h3>
               <span className="dim">新闻里写明原因的才列出</span>
             </div>
             {(b.movers || []).map((m, i) => (
@@ -203,6 +231,20 @@ export default function DailyBrief({ onMap }) {
               </div>
             ))}
             {!b.movers?.length && <div className="dim">新闻里没有明确的异动原因。</div>}
+            {b.volume?.length > 0 && (
+              <>
+                <h4 className="sec">🔊 放量 / 成交最多</h4>
+                {b.volume.map((v, i) => (
+                  <div className="row mover" key={i}>
+                    <span className="ticker">{v.ticker}</span>
+                    <span className="small dim">{v.name}</span>
+                    <span className="small" style={{ flex: 1 }}>
+                      {v.note} <Src ids={v.src} news={b.news} />
+                    </span>
+                  </div>
+                ))}
+              </>
+            )}
           </div>
 
           <div className="card">

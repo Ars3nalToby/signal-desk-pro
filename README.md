@@ -8,7 +8,7 @@
 
 | Tab | 来源 | 耗 AI 额度？ |
 |---|---|---|
-| ⓪ 今日简报 — IPO 雷达（ASX 官方 upcoming floats）、ASX 异动、热点、接下来要盯；每天约 6:30am / 4:45pm 自动生成 | 新增 | 每份 1 Flash + 1 Flash-Lite |
+| ⓪ 今日简报 — 政治/战争、ASX 热股与放量、IPO 雷达（ASX 官方 upcoming floats）、热点、接下来要盯；每天约 6:30am / 4:45pm 自动生成 | 新增 | 每份 1 Flash + 1 Flash-Lite |
 | ① Morning Board — 行情、经济日历、新闻、catalyst 日历、快速链接 | Global Signal Deck | 不耗 |
 | ② Hot Scan — 全球热点，按二阶效应潜力排序 | Domino Desk | 1 次搜索 |
 | ③ Research — 骨牌推演 / Leto Bao 五步 / Next Nvidia 五关 | 两者合并 | 骨牌 1 搜索；五步 3 搜索 + 3 推理；五关 1 搜索 |

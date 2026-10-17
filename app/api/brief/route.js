@@ -10,7 +10,7 @@ export const maxDuration = 60;
 export const dynamic = "force-dynamic";
 
 function cachedBrief(key, slot) {
-  return unstable_cache(() => buildBrief(key, slot), ["daily-brief-v1", slot.key], {
+  return unstable_cache(() => buildBrief(key, slot), ["daily-brief-v2", slot.key], {
     revalidate: 60 * 60 * 6,
     tags: ["daily-brief"],
   })();
