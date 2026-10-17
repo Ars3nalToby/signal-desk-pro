@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import DailyBrief from "../components/DailyBrief";
 import MorningBoard from "../components/MorningBoard";
 import HotScan from "../components/HotScan";
 import Research from "../components/Research";
@@ -9,7 +10,8 @@ import { QuotaMeter } from "../components/ui";
 import { load, save } from "../lib/store";
 
 const TABS = [
-  ["board", "①", "Morning Board", "早上扫一眼"],
+  ["brief", "⓪", "今日简报", "IPO · 异动 · 热点"],
+  ["board", "①", "Morning Board", "行情 · 日历 · 新闻"],
   ["scan", "②", "Hot Scan", "今天研究什么"],
   ["research", "③", "Research", "骨牌 · 五步 · 五关"],
   ["gate", "④", "Decision Gate", "先写论文再下注"],
@@ -41,14 +43,12 @@ function PassPrompt({ onDone }) {
 }
 
 export default function Home() {
-  const [tab, setTab] = useState("board");
+  const [tab, setTab] = useState("brief");
   const [seed, setSeed] = useState(null);
   const [handoff, setHandoff] = useState(null);
   const [needPass, setNeedPass] = useState(false);
 
   useEffect(() => {
-    const t = load("tab", "board");
-    if (TABS.some(([k]) => k === t)) setTab(t);
     const f = () => setNeedPass(true);
     window.addEventListener("sdp-auth", f);
     return () => window.removeEventListener("sdp-auth", f);
@@ -87,6 +87,14 @@ export default function Home() {
       </nav>
 
       <main>
+        <section style={{ display: tab === "brief" ? "block" : "none" }}>
+          <DailyBrief
+            onMap={(text) => {
+              setSeed({ text, at: Date.now() });
+              go("research");
+            }}
+          />
+        </section>
         <section style={{ display: tab === "board" ? "block" : "none" }}>
           <MorningBoard />
         </section>

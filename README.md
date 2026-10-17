@@ -4,10 +4,11 @@
 
 整套运行成本 **$0**：Vercel Hobby（免费）+ Gemini API 免费层 + 浏览器本地存储。
 
-## 五个 tab
+## 六个 tab
 
 | Tab | 来源 | 耗 AI 额度？ |
 |---|---|---|
+| ⓪ 今日简报 — IPO 雷达（ASX 官方 upcoming floats）、ASX 异动、热点、接下来要盯；每天约 6:30am / 4:45pm 自动生成 | 新增 | 每份 1 Flash + 1 Flash-Lite |
 | ① Morning Board — 行情、经济日历、新闻、catalyst 日历、快速链接 | Global Signal Deck | 不耗 |
 | ② Hot Scan — 全球热点，按二阶效应潜力排序 | Domino Desk | 1 次搜索 |
 | ③ Research — 骨牌推演 / Leto Bao 五步 / Next Nvidia 五关 | 两者合并 | 骨牌 1 搜索；五步 3 搜索 + 3 推理；五关 1 搜索 |
@@ -46,3 +47,9 @@ npm run dev                  # http://localhost:3000
 - 交易记录只存在当前浏览器。换设备或清浏览器前，在 Journal 用「导出备份」。
 - 不要把 ai-builder-project（Tier 1，付费）的 key 放进来。
 - 研究框架，不是投资建议。AI 会出错，数字要自己核对原始来源。
+
+## 定时任务
+
+`vercel.json` 里两个每日定时任务（Vercel 免费版每个任务每天最多一次，时间误差一小时内）：
+- UTC 20:30 → 布里斯班约 6:30am，开盘前简报
+- UTC 06:45 → 布里斯班约 4:45pm，收盘后简报

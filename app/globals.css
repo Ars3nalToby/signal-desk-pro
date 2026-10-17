@@ -40,7 +40,7 @@ header { display: flex; align-items: center; justify-content: space-between; gap
 .bar b { display: block; height: 100%; background: var(--amber); }
 .q-detail { position: absolute; right: 0; top: 100%; margin-top: 6px; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 10px; width: 300px; z-index: 20; display: grid; gap: 3px; }
 
-.tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 16px; }
+.tabs { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 16px; }
 .tab { background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 10px; text-align: left; cursor: pointer; display: grid; gap: 1px; font-family: var(--body); }
 .tab b { font-family: var(--display); font-size: 14px; }
 .tab small { color: var(--faint); font-size: 11.5px; }
@@ -181,9 +181,24 @@ label { display: flex; align-items: center; gap: 6px; font-size: 13px; color: va
 footer { margin-top: 28px; text-align: center; }
 
 @media (max-width: 860px) {
-  .tabs { grid-template-columns: repeat(5, minmax(110px, 1fr)); overflow-x: auto; }
+  .tabs { grid-template-columns: repeat(6, minmax(108px, 1fr)); overflow-x: auto; }
   .grid2, .domino { grid-template-columns: 1fr; }
   .stats { grid-template-columns: repeat(2, 1fr); }
   .quota { width: 100%; }
   .row:not(.wrap) { flex-wrap: wrap; }
 }
+
+/* Daily Brief */
+.brief-head { border-color: var(--amber); }
+.brief-headline { font-family: var(--display); font-size: 21px; margin: 2px 0 0; line-height: 1.35; }
+.src-links { display: inline-flex; gap: 2px; margin-left: 4px; }
+.src-links a { font-family: var(--mono); font-size: 11px; color: var(--faint); text-decoration: none; }
+.src-links a:hover { color: var(--amber); }
+.mover { border-top: 1px solid var(--line); padding-top: 6px; flex-wrap: wrap; }
+.ftable { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 13.5px; }
+.ftable td { border-top: 1px solid var(--line); padding: 5px 6px; vertical-align: top; }
+details summary { cursor: pointer; }
+.src-list { margin: 8px 0 0; padding-left: 22px; display: grid; gap: 4px; font-size: 13px; }
+.src-list a { color: var(--ink); text-decoration: none; }
+.src-list a:hover { color: var(--amber); }
+.effect > .mini { justify-self: start; }
