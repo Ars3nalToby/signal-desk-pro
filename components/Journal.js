@@ -2,8 +2,9 @@
 // ⑤ Journal & Review — ASX + US + Crypto 交易记录与复盘。完全不耗 AI 额度。
 import { useRef, useState } from "react";
 import { usePersist, uid, exportAll, importAll } from "../lib/store";
+import { summarize, SOURCES, SOURCE_LABEL } from "../lib/stats";
 
-function pnlOf(t) {
+export function pnlOf(t) {
   if (t.exit == null || !t.entry) return null;
   const sign = t.dir === "short" ? -1 : 1;
   return ((t.exit - t.entry) / t.entry) * t.size * sign;
@@ -71,6 +72,7 @@ function TradeCard({ t, onUpdate, onDelete }) {
         <span className="ticker">{t.ticker}</span>
         <span className="tag">{t.market}</span>
         <span className="tag">{t.dir === "short" ? "SHORT" : "LONG"}</span>
+        {t.source && <span className="tag">{SOURCE_LABEL[t.source]}</span>}
         <span className="mono small">
           ${t.size} @ {t.entry}
         </span>
@@ -166,8 +168,8 @@ function NoteAdder({ onAdd }) {
 }
 
 function QuickCrypto({ onAdd }) {
-  const [f, setF] = useState({ ticker: "", entry: "", exit: "", size: "", lesson: "" });
-  const ok = f.ticker && +f.entry > 0 && +f.exit > 0 && +f.size > 0;
+  const [f, setF] = useState({ ticker: "", entry: "", exit: "", size: "", lesson: "", source: "" });
+  const ok = f.ticker && +f.entry > 0 && +f.exit > 0 && +f.size > 0 && f.source;
   return (
     <div className="card">
       <div className="card-head">
@@ -179,6 +181,14 @@ function QuickCrypto({ onAdd }) {
         <input type="number" step="any" placeholder="买入价" value={f.entry} onChange={(e) => setF({ ...f, entry: e.target.value })} style={{ width: 110 }} />
         <input type="number" step="any" placeholder="卖出价" value={f.exit} onChange={(e) => setF({ ...f, exit: e.target.value })} style={{ width: 110 }} />
         <input type="number" placeholder="金额 $" value={f.size} onChange={(e) => setF({ ...f, size: e.target.value })} style={{ width: 100 }} />
+        <select value={f.source} onChange={(e) => setF({ ...f, source: e.target.value })}>
+          <option value="">想法来源？</option>
+          {SOURCES.map(([k, l]) => (
+            <option key={k} value={k}>
+              {l}
+            </option>
+          ))}
+        </select>
         <input placeholder="一句话复盘" value={f.lesson} onChange={(e) => setF({ ...f, lesson: e.target.value })} style={{ flex: 1 }} />
         <button
           className="btn"
@@ -194,13 +204,14 @@ function QuickCrypto({ onAdd }) {
               exit: +f.exit,
               size: +f.size,
               lesson: f.lesson,
+              source: f.source,
               status: "closed",
               quick: true,
               openedAt: now,
               closedAt: now,
               exitReason: "other",
             });
-            setF({ ticker: "", entry: "", exit: "", size: "", lesson: "" });
+            setF({ ticker: "", entry: "", exit: "", size: "", lesson: "", source: "" });
           }}
         >
           记录
@@ -222,6 +233,7 @@ export default function Journal() {
   const rs = closed.map(rOf).filter((x) => x != null);
   const avgR = rs.length ? rs.reduce((a, b) => a + b, 0) / rs.length : null;
   const emotion = closed.filter((t) => t.exitReason === "emotion").length;
+  const sum = summarize(closed.map((t) => ({ net: pnlOf(t) || 0 })));
   const gateTrades = closed.filter((t) => !t.quick).length;
 
   const update = (id, patch) => setTrades(trades.map((t) => (t.id === id ? { ...t, ...patch } : t)));
@@ -247,7 +259,7 @@ export default function Journal() {
 
   return (
     <div className="stack">
-      <div className="stats">
+      <div className="stats seven">
         <div>
           <span className="label">已平仓</span>
           <b className="mono">{closed.length}</b>
@@ -265,6 +277,16 @@ export default function Journal() {
         <div>
           <span className="label">平均 R</span>
           <b className="mono">{avgR != null ? avgR.toFixed(2) + "R" : "—"}</b>
+        </div>
+        <div>
+          <span className="label">期望值 / 笔</span>
+          <b className={`mono ${(sum.expectancy ?? 0) >= 0 ? "ok-text" : "warn-text"}`}>
+            {sum.expectancy != null ? `${sum.expectancy >= 0 ? "+" : "-"}$${Math.abs(sum.expectancy).toFixed(0)}` : "—"}
+          </b>
+        </div>
+        <div>
+          <span className="label">盈亏比</span>
+          <b className="mono">{sum.payoff != null ? sum.payoff.toFixed(2) : "—"}</b>
         </div>
         <div>
           <span className="label">情绪离场</span>

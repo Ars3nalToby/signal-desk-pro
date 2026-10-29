@@ -2,6 +2,7 @@
 // ④ Decision Gate — 来自 Signal Desk Pro：资金锁定 + Leopold Gate（先写论文再下注）+ 冷静期。完全不耗 AI 额度。
 import { useEffect, useState } from "react";
 import { usePersist, uid } from "../lib/store";
+import { SOURCES } from "../lib/stats";
 
 const COOL_SECONDS = 60;
 
@@ -9,6 +10,7 @@ function Capital({ cap, setCap, openExposure }) {
   const [draft, setDraft] = useState(cap);
   useEffect(() => setDraft(cap), [cap]);
   const locked = cap.gameMoney > 0;
+  const riskPct = cap.riskPct ?? 2;
   const left = Math.max(0, cap.gameMoney - openExposure);
   return (
     <div className="card">
@@ -37,6 +39,12 @@ function Capital({ cap, setCap, openExposure }) {
             </b>
           </div>
           <div>
+            <span className="label">单笔最多亏</span>
+            <b className="mono">
+              {riskPct}% = ${Math.round((cap.gameMoney * riskPct) / 100).toLocaleString()}
+            </b>
+          </div>
+          <div>
             <span className="label">同时最多持仓</span>
             <b className="mono">{cap.maxOpen}</b>
           </div>
@@ -54,6 +62,10 @@ function Capital({ cap, setCap, openExposure }) {
             单笔上限 %
             <input type="number" min="1" max="100" value={draft.maxPct} onChange={(e) => setDraft({ ...draft, maxPct: +e.target.value })} />
           </label>
+          <label title="一笔交易打到止损时，最多亏掉游戏资金的百分之几。专业交易员常用 1–2%。">
+            单笔最多亏 %
+            <input type="number" min="0.25" max="10" step="0.25" value={draft.riskPct ?? 2} onChange={(e) => setDraft({ ...draft, riskPct: +e.target.value })} />
+          </label>
           <label>
             最多持仓数
             <input type="number" min="1" max="20" value={draft.maxOpen} onChange={(e) => setDraft({ ...draft, maxOpen: +e.target.value })} />
@@ -64,7 +76,7 @@ function Capital({ cap, setCap, openExposure }) {
             onClick={() => {
               const log = [...(cap.log || [])];
               if (cap.gameMoney) log.push({ at: new Date().toISOString(), from: cap.gameMoney, to: draft.gameMoney });
-              setCap({ gameMoney: draft.gameMoney, maxPct: draft.maxPct, maxOpen: draft.maxOpen, log });
+              setCap({ gameMoney: draft.gameMoney, maxPct: draft.maxPct, riskPct: draft.riskPct ?? 2, maxOpen: draft.maxOpen, log });
             }}
           >
             锁定
@@ -93,6 +105,7 @@ const EMPTY = {
   stop: "",
   target: "",
   timeExit: "",
+  source: "",
   checks: {},
 };
 
@@ -103,7 +116,7 @@ const CHECKS = [
 ];
 
 export default function DecisionGate({ handoff, onRecorded }) {
-  const [cap, setCap] = usePersist("capital", { gameMoney: 0, maxPct: 20, maxOpen: 5, log: [] });
+  const [cap, setCap] = usePersist("capital", { gameMoney: 0, maxPct: 20, riskPct: 2, maxOpen: 5, log: [] });
   const [trades, setTrades] = usePersist("trades", []);
   const [f, setF] = usePersist("gateDraft", EMPTY);
   const [coolUntil, setCoolUntil] = useState(0);
@@ -125,6 +138,17 @@ export default function DecisionGate({ handoff, onRecorded }) {
   const maxSize = (cap.gameMoney * cap.maxPct) / 100;
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
+  const entry = +f.entry,
+    stop = +f.stop,
+    target = +f.target;
+  const riskPct = entry && stop ? Math.abs((entry - stop) / entry) * 100 : 0;
+  const rr = entry && stop && target ? Math.abs(target - entry) / Math.abs(entry - stop) : 0;
+  const dollarRisk = (+f.size || 0) * (riskPct / 100);
+  // 按风险算仓位：最多愿意亏的钱 ÷ 止损距离。止损越远，能买的越少。
+  const riskBudget = (cap.gameMoney * (cap.riskPct ?? 2)) / 100;
+  const sizeByRisk = riskPct > 0 ? riskBudget / (riskPct / 100) : null;
+  const stopWrongSide = entry > 0 && stop > 0 && (f.dir === "short" ? stop <= entry : stop >= entry);
+
   const problems = [];
   if (!(cap.gameMoney > 0)) problems.push("先锁定游戏资金");
   if (!f.ticker.trim()) problems.push("填 ticker");
@@ -138,15 +162,12 @@ export default function DecisionGate({ handoff, onRecorded }) {
   });
   if ((f.falsify || "").trim().length < 10) problems.push("写清楚证伪条件");
   if (!(+f.stop > 0)) problems.push("填止损价");
+  if (stopWrongSide) problems.push(f.dir === "short" ? "做空的止损要高于进场价" : "做多的止损要低于进场价");
+  if (sizeByRisk != null && +f.size > sizeByRisk + 0.5) problems.push(`按风险，这笔最多买 $${Math.floor(sizeByRisk)}（止损太远就要买少一点）`);
+  if (!f.source) problems.push("选这笔想法的来源");
   if (!f.timeExit.trim()) problems.push("填时间止损（多久没兑现就走）");
   if (CHECKS.some(([k]) => !f.checks?.[k])) problems.push("勾选三项自我检查");
 
-  const entry = +f.entry,
-    stop = +f.stop,
-    target = +f.target;
-  const riskPct = entry && stop ? Math.abs((entry - stop) / entry) * 100 : 0;
-  const rr = entry && stop && target ? Math.abs(target - entry) / Math.abs(entry - stop) : 0;
-  const dollarRisk = (+f.size || 0) * (riskPct / 100);
 
   const cooling = coolUntil && now < coolUntil;
   const cooled = coolUntil && now >= coolUntil;
@@ -210,6 +231,20 @@ export default function DecisionGate({ handoff, onRecorded }) {
           </label>
         </div>
 
+        <div className="row wrap">
+          <label style={{ flex: 1 }}>
+            这个想法从哪里来？
+            <select value={f.source} onChange={set("source")}>
+              <option value="">选一个（老实选，复盘才有用）</option>
+              {SOURCES.map(([k, l]) => (
+                <option key={k} value={k}>
+                  {l}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         <h4 className="sec">三句 thesis（用自己的话）</h4>
         <input placeholder="1. 发生了什么变化？（事实，不是感觉）" value={f.t1} onChange={set("t1")} />
         <input placeholder="2. 为什么市场还没充分定价？" value={f.t2} onChange={set("t2")} />
@@ -240,6 +275,11 @@ export default function DecisionGate({ handoff, onRecorded }) {
             <span>
               最多亏 <b className="mono">${dollarRisk.toFixed(0)}</b>
             </span>
+            {sizeByRisk != null && cap.gameMoney > 0 && (
+              <span className={+f.size > sizeByRisk + 0.5 ? "warn-text" : "ok-text"}>
+                按风险最多买 <b className="mono">${Math.floor(Math.min(sizeByRisk, maxSize)).toLocaleString()}</b>（单笔最多亏 ${Math.round(riskBudget)}）
+              </span>
+            )}
             {rr > 0 && (
               <span className={rr >= 2 ? "ok-text" : "warn-text"}>
                 风险回报比 <b className="mono">1 : {rr.toFixed(1)}</b> {rr < 2 && "（低于 1:2，要想清楚）"}

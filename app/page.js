@@ -6,16 +6,19 @@ import HotScan from "../components/HotScan";
 import Research from "../components/Research";
 import DecisionGate from "../components/DecisionGate";
 import Journal from "../components/Journal";
+import Review from "../components/Review";
 import { QuotaMeter } from "../components/ui";
 import { load, save } from "../lib/store";
 
+// 前三个是「驾驶舱」：决定、复盘、记录。后四个是「雷达」：辅助找想法。
 const TABS = [
-  ["brief", "⓪", "今日简报", "IPO · 异动 · 热点"],
-  ["board", "①", "Morning Board", "行情 · 日历 · 新闻"],
-  ["scan", "②", "Hot Scan", "今天研究什么"],
-  ["research", "③", "Research", "骨牌 · 五步 · 五关"],
-  ["gate", "④", "Decision Gate", "先写论文再下注"],
-  ["journal", "⑤", "Journal", "记录与复盘"],
+  ["gate", "①", "Decision Gate", "下单前先过这道门", "core"],
+  ["review", "②", "复盘 Review", "真实成绩单 · 期望值", "core"],
+  ["journal", "③", "Journal", "记录每一笔", "core"],
+  ["brief", "④", "今日简报", "IPO · 异动 · 热点", "radar"],
+  ["board", "⑤", "Morning Board", "行情 · 日历 · 新闻", "radar"],
+  ["scan", "⑥", "Hot Scan", "今天研究什么", "radar"],
+  ["research", "⑦", "Research", "骨牌 · 五步 · 五关", "radar"],
 ];
 
 function PassPrompt({ onDone }) {
@@ -43,7 +46,7 @@ function PassPrompt({ onDone }) {
 }
 
 export default function Home() {
-  const [tab, setTab] = useState("brief");
+  const [tab, setTab] = useState("review");
   const [seed, setSeed] = useState(null);
   const [handoff, setHandoff] = useState(null);
   const [needPass, setNeedPass] = useState(false);
@@ -70,15 +73,15 @@ export default function Home() {
           </div>
           <div>
             <h1>SIGNAL DESK PRO</h1>
-            <div className="dim small">发现 → 研究 → 决定 → 复盘</div>
+            <div className="dim small">决定 → 记录 → 复盘 · 雷达只是辅助</div>
           </div>
         </div>
         <QuotaMeter />
       </header>
 
       <nav className="tabs">
-        {TABS.map(([k, n, l, s]) => (
-          <button key={k} className={`tab ${tab === k ? "on" : ""}`} onClick={() => go(k)}>
+        {TABS.map(([k, n, l, s, kind]) => (
+          <button key={k} className={`tab ${kind} ${tab === k ? "on" : ""}`} onClick={() => go(k)}>
             <span className="mono">{n}</span>
             <b>{l}</b>
             <small>{s}</small>
@@ -120,6 +123,9 @@ export default function Home() {
         </section>
         <section style={{ display: tab === "journal" ? "block" : "none" }}>
           <Journal />
+        </section>
+        <section style={{ display: tab === "review" ? "block" : "none" }}>
+          <Review />
         </section>
       </main>
 
