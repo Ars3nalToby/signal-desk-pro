@@ -8,12 +8,14 @@ import DecisionGate from "../components/DecisionGate";
 import Journal from "../components/Journal";
 import Review from "../components/Review";
 import MarketClock from "../components/MarketClock";
+import LiveWire from "../components/LiveWire";
 import { QuotaMeter } from "../components/ui";
 import { load, save } from "../lib/store";
 
 // 主导航：每天看的四个页面
 const TABS = [
   ["brief", "今日简报", "开盘前和收盘后，一页看懂"],
+  ["wire", "Live Wire", "各大媒体头条，每 2 分钟更新"],
   ["board", "Morning Board", "行情、Hyperliquid、新闻、日历"],
   ["scan", "Hot Scan", "今天值得研究什么"],
   ["research", "Research", "骨牌、五步、五关"],
@@ -117,6 +119,12 @@ export default function Home() {
             }}
           />
         </section>
+        {/* Live Wire 只在打开时才抓新闻，避免在后台一直刷新 */}
+        {tab === "wire" && (
+          <section>
+            <LiveWire />
+          </section>
+        )}
         <section style={{ display: tab === "board" ? "block" : "none" }}>
           <MorningBoard />
         </section>

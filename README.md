@@ -8,11 +8,12 @@
 
 ## 页面
 
-**每天看的四个页面（主导航）**
+**每天看的五个页面（主导航）**
 
 | 页面 | 做什么 | 耗 AI 额度？ |
 |---|---|---|
 | 今日简报 — 头条和市场情绪、ASX 异动与放量、IPO 雷达（ASX 官方名单 + 倒数天数）、政治与战争、Crypto 与 Hyperliquid、二阶热点、接下来要盯；每天约 6:30am / 4:45pm 自动生成 | 一页看懂今天 | 每份 1 Flash + 1 Flash-Lite |
+| Live Wire — 此刻澳洲大头条和全球头条（Google News 聚合），各大媒体头版（ABC、SMH、Guardian、AFR、Reuters、Bloomberg、CNBC、FT、BBC、NYT、Al Jazeera、CoinDesk、The Block、韩联社、BBC 中文），以及所有媒体按时间排的新闻流；每 2 分钟自动更新，新出现的标「新」。媒体清单在 `lib/wire.js` | 实时新闻 | 不耗 |
 | Morning Board — Hyperliquid 实时盯盘（HYPE、BTC/ETH/SOL、24h 异动、trade[XYZ] 最活跃的股票和大宗商品永续，每 30 秒更新）、TradingView 行情条、新闻、经济日历、Catalyst 日历、快速链接 | 行情和日历 | 不耗 |
 | Hot Scan — 全球热点按二阶效应潜力排名 | 今天研究什么 | 1 次 |
 | Research — 骨牌推演 / Leto Bao 五步 / Next Nvidia 五关 | 深入研究 | 1–6 次 |

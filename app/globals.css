@@ -56,7 +56,7 @@ b, strong { font-weight: 700; }
 
 /* ───── 导航 ───── */
 .nav { margin-bottom: 20px; display: grid; gap: 10px; }
-.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .tab { position: relative; background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: var(--r); padding: 14px 16px 13px; text-align: left; cursor: pointer; display: grid; gap: 2px; font-family: var(--body); transition: border-color 0.15s, background 0.15s; }
 .tab b { font-family: var(--display); font-size: 19px; font-weight: 800; font-stretch: 85%; }
 .tab small { color: var(--faint); font-size: 12.5px; font-weight: 500; }
@@ -282,6 +282,42 @@ details summary { cursor: pointer; }
 .conviction b { font-family: var(--display); font-size: 48px; font-weight: 900; color: var(--amber); }
 .cta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-color: var(--amber); }
 
+/* ───── Live Wire ───── */
+.wire-top { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; }
+.wire-lead { position: relative; padding: 24px 26px; border-radius: var(--r-lg); border: 1px solid var(--line); background: radial-gradient(120% 140% at 0% 0%, #1d1406 0%, var(--panel) 48%); display: grid; gap: 8px; align-content: start; }
+.wire-kicker { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--amber); font-weight: 700; }
+.lamp.on { background: var(--bear); box-shadow: 0 0 0 3px #ff5d5233, 0 0 12px #ff5d52aa; animation: breathe-red 2.6s ease-in-out infinite; }
+@keyframes breathe-red { 50% { box-shadow: 0 0 0 5px #ff5d5218, 0 0 18px #ff5d5266; } }
+.wire-lead-title { color: var(--ink); text-decoration: none; font-size: clamp(22px, 2.8vw, 32px); font-weight: 900; line-height: 1.25; max-width: 28em; }
+.wire-lead-title:hover { color: var(--amber); }
+.wire-world { padding: 20px 22px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--panel); display: grid; gap: 6px; align-content: start; }
+.wire-rest { list-style: none; margin: 4px 0 0; padding: 0; display: grid; }
+.wire-rest li { display: grid; gap: 0; padding: 8px 0; border-top: 1px solid var(--line); }
+.wire-rest a { color: var(--ink); text-decoration: none; font-weight: 600; line-height: 1.45; }
+.wire-rest a:hover { color: var(--amber); }
+.wire-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr); gap: 14px; align-items: start; }
+.wire-stream { position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: hidden; grid-template-rows: auto 1fr; }
+.stream { list-style: none; margin: 0; padding: 0 4px 0 0; overflow-y: auto; display: grid; align-content: start; }
+.stream li { display: grid; grid-template-columns: 52px 1fr; gap: 10px; padding: 9px 0 9px 8px; border-top: 1px solid var(--line); border-left: 3px solid transparent; }
+.stream li:first-child { border-top: none; }
+.stream li.is-new { border-left-color: var(--amber); background: linear-gradient(90deg, #ffb02012, transparent 60%); }
+.stream time { color: var(--amber); font-size: 14px; padding-top: 1px; }
+.stream a { color: var(--ink); text-decoration: none; font-weight: 600; line-height: 1.45; }
+.stream a:hover { color: var(--amber); }
+.stream-meta { display: flex; gap: 10px; font-size: 12px; color: var(--faint); margin-top: 2px; }
+.new-flag { color: var(--amber); }
+.fronts { columns: 2; column-gap: 12px; }
+.front { gap: 6px; break-inside: avoid; margin-bottom: 12px; }
+.front-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-bottom: 2px solid var(--ink); padding-bottom: 6px; }
+.front-head h3 { font-size: 17px; }
+.front-head a { color: var(--dim); }
+.front-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.front-list li { display: grid; padding: 7px 0; border-top: 1px solid var(--line); }
+.front-list li:first-child { border-top: none; }
+.front-list a { color: var(--ink); text-decoration: none; font-size: 14px; line-height: 1.45; }
+.front-list .front-lead a { font-size: 16px; font-weight: 800; }
+.front-list a:hover { color: var(--amber); }
+
 /* ───── 交易工具（Decision Gate / 复盘 / Journal）───── */
 .cap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; align-items: end; }
 .cap-grid > div { display: grid; }
@@ -321,8 +357,13 @@ footer { margin-top: 30px; text-align: center; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+@media (max-width: 1100px) {
+  .tabs { grid-template-columns: repeat(3, 1fr); }
+  .fronts { columns: 1; }
+}
 @media (max-width: 960px) {
-  .brief-grid, .hl-grid { grid-template-columns: 1fr; }
+  .brief-grid, .hl-grid, .wire-top, .wire-grid { grid-template-columns: 1fr; }
+  .wire-stream { position: static; max-height: 70vh; }
   .clocks { max-width: none; flex-basis: 100%; }
 }
 @media (max-width: 760px) {
