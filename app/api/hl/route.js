@@ -5,8 +5,10 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 30;
 
 const API = "https://api.hyperliquid.xyz/info";
-const FILL_PAGE = 2000; // userFillsByTime 每次最多 2000 条，总共只能拿到最近 10000 条
-const FUNDING_PAGE = 500;
+// 官方文档：按时间范围查询的接口每次只返回约 500 条（userFillsByTime 写的是最多 2000 条），
+// 要拿更多就「用最后一条的时间戳当下一次的 startTime」往后翻页。成交总共只能拿到最近 10000 条。
+// 所以只要这一页 ≥ 500 条就继续翻，宁可多问一次，也不要漏掉。
+const MIN_PAGE = 500;
 
 async function info(body) {
   const r = await fetch(API, {
@@ -20,7 +22,7 @@ async function info(body) {
 }
 
 // 从 startTime 往后一页一页拿，直到拿完或到上限
-async function paged(type, user, startTime, pageSize, maxPages, extra = {}) {
+async function paged(type, user, startTime, maxPages, extra = {}) {
   const out = [];
   const seen = new Set();
   let t = startTime;
@@ -37,7 +39,7 @@ async function paged(type, user, startTime, pageSize, maxPages, extra = {}) {
       }
       if (x.time > maxTime) maxTime = x.time;
     }
-    if (batch.length < pageSize) break;
+    if (batch.length < MIN_PAGE) break;
     t = maxTime > t ? maxTime : t + 1;
     if (i === maxPages - 1) truncated = true;
   }
@@ -58,8 +60,8 @@ export async function POST(req) {
 
   try {
     const [fills, funding] = await Promise.all([
-      paged("userFillsByTime", user, startTime, FILL_PAGE, 5, { aggregateByTime: true }),
-      paged("userFunding", user, startTime, FUNDING_PAGE, 10),
+      paged("userFillsByTime", user, startTime, 25, { aggregateByTime: true }),
+      paged("userFunding", user, startTime, 20),
     ]);
     return Response.json(
       { fills: fills.list, funding: funding.list, truncated: fills.truncated || funding.truncated, days, fetchedAt: Date.now() },
