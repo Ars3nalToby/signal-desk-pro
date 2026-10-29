@@ -1,7 +1,7 @@
 "use client";
 // ② 复盘 Review — 真实成绩单。Hyperliquid 钱包自动同步 + 手动 Journal，一起算期望值，按「想法来源」拆开看。完全不耗 AI 额度。
 import { useEffect, useState } from "react";
-import { usePersist } from "../lib/store";
+import { usePersist, load } from "../lib/store";
 import { buildTrips, attachFunding, fmtDuration } from "../lib/hl";
 import { summarize, bySource, verdict, SOURCES, SOURCE_LABEL, PERIODS, inPeriod } from "../lib/stats";
 import { pnlOf } from "./Journal";
@@ -92,11 +92,19 @@ function SyncCard({ addr, setAddr, onSynced, syncedAt, info }) {
     try {
       const res = await fetch("/api/hl", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "x-app-pass": load("pass", "") },
         body: JSON.stringify({ user: draft.trim(), days }),
       });
-      const j = await res.json();
-      if (!res.ok) throw new Error(j.error || `错误 ${res.status}`);
+      let j = {};
+      try {
+        j = await res.json();
+      } catch {
+        throw new Error(res.status === 504 ? "读取超时，请再试一次或选短一点的时间范围" : `服务器错误 ${res.status}`);
+      }
+      if (!res.ok) {
+        if (j.auth) window.dispatchEvent(new Event("sdp-auth"));
+        throw new Error(j.error || `错误 ${res.status}`);
+      }
       setAddr(draft.trim().toLowerCase());
       onSynced(j);
     } catch (e) {
@@ -257,7 +265,7 @@ export default function Review() {
             <span className="dim">给每一笔标上想法来源；鼠标停在盈亏上可以看拆分</span>
           </div>
           {shown.map((t) => (
-            <TripRow key={t.id} t={t} tag={tags[t.id]} setTag={(v) => setTags({ ...tags, [t.id]: v })} />
+            <TripRow key={t.id} t={t} tag={tags[t.id]} setTag={(v) => setTags((p) => ({ ...p, [t.id]: v }))} />
           ))}
           {recent.length > 25 && (
             <button className="mini ghost" onClick={() => setShowAll(!showAll)}>

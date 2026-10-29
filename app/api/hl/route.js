@@ -28,7 +28,15 @@ async function paged(type, user, startTime, maxPages, extra = {}) {
   let t = startTime;
   let truncated = false;
   for (let i = 0; i < maxPages; i++) {
-    const batch = await info({ type, user, startTime: t, ...extra });
+    let batch;
+    try {
+      batch = await info({ type, user, startTime: t, ...extra });
+    } catch (e) {
+      // 第一页就失败才算失败；后面某页失败（例如被限速），保留已经拿到的，并标记不完整
+      if (i === 0) throw e;
+      truncated = true;
+      break;
+    }
     if (!Array.isArray(batch) || !batch.length) break;
     let maxTime = t;
     for (const x of batch) {
@@ -47,6 +55,11 @@ async function paged(type, user, startTime, maxPages, extra = {}) {
 }
 
 export async function POST(req) {
+  // 和 /api/ai 一样的可选密码锁：在 Vercel 设置了 APP_PASSWORD，别人就不能拿你的网址当免费代理
+  const pass = process.env.APP_PASSWORD;
+  if (pass && req.headers.get("x-app-pass") !== pass) {
+    return Response.json({ error: "密码不对", auth: true }, { status: 401 });
+  }
   let body = {};
   try {
     body = await req.json();
