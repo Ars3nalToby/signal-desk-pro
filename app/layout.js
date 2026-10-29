@@ -5,7 +5,7 @@ export const metadata = {
   description: "发现 → 研究 → 决定 → 复盘 · 个人交易研究台",
 };
 
-export const viewport = { width: "device-width", initialScale: 1, themeColor: "#0b1220" };
+export const viewport = { width: "device-width", initialScale: 1, themeColor: "#000000" };
 
 export default function RootLayout({ children }) {
   return (
@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@500;700&family=Noto+Sans+SC:wght@400;500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Space+Grotesk:wght@600;700&family=Noto+Sans+SC:wght@500;600;700;900&display=swap"
           rel="stylesheet"
         />
         <link
