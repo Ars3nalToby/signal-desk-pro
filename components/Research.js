@@ -122,7 +122,7 @@ function ChainMapper({ seed, onSave }) {
     <div className="stack">
       <div className="card">
         <div className="card-head">
-          <h3>骨牌推演 Chain Mapper</h3>
+          <h3>骨牌推演</h3>
           <span className="dim">新闻 → 一阶 / 二阶 / 三阶 → 具体 ticker + 定价程度</span>
         </div>
         <textarea rows={3} placeholder="贴一条新闻或事件，如：Anthropic 招标 1.4GW 澳洲数据中心容量…" value={headline} onChange={(e) => setHeadline(e.target.value)} />
@@ -130,7 +130,7 @@ function ChainMapper({ seed, onSave }) {
           <MarketPick v={market} set={setMarket} />
           <span style={{ flex: 1 }} />
           <button className="btn primary" disabled={!headline.trim() || busy} onClick={go}>
-            {busy ? "推演中…" : "推演 (1 次 AI)"}
+            {busy ? "正在推演" : "开始推演"}
           </button>
         </div>
         {busy && <Spinner text="抓最新新闻 → 推演一/二/三阶…" />}
@@ -346,7 +346,7 @@ function Pipeline({ onSave, onDecide }) {
         <div className="card cta">
           <span>研究完成。想进一步行动，先过 Decision Gate。</span>
           <button className="btn primary" onClick={() => onDecide({ title: signal, research: results })}>
-            带去 Decision Gate →
+            带去 Decision Gate
           </button>
         </div>
       )}
@@ -385,7 +385,7 @@ function NNScreen({ onSave }) {
           <input placeholder="主题，如：AI 数据中心电力设备、铀、国防、GLP-1 供应链…" value={theme} onChange={(e) => setTheme(e.target.value)} style={{ flex: 1 }} />
           <MarketPick v={market} set={setMarket} />
           <button className="btn primary" disabled={!theme.trim() || busy} onClick={go}>
-            {busy ? "筛选中…" : "筛选 (1 次 AI)"}
+            {busy ? "正在筛选" : "开始筛选"}
           </button>
         </div>
         {busy && <Spinner text="抓新闻 → 找候选公司并逐关打分…" />}
@@ -443,7 +443,7 @@ function HistoryView({ h, onBack, onDecide }) {
   return (
     <div className="stack">
       <button className="btn" onClick={onBack}>
-        ← 返回
+        返回研究
       </button>
       <h3>{h.title}</h3>
       {h.type === "chain" && <ChainResult r={h.result} />}
@@ -467,7 +467,7 @@ function HistoryView({ h, onBack, onDecide }) {
           </div>
         ))}
       <button className="btn primary" onClick={() => onDecide({ title: h.title, research: h.result })}>
-        带去 Decision Gate →
+        带去 Decision Gate
       </button>
     </div>
   );
@@ -494,14 +494,16 @@ export default function Research({ seed, onDecide }) {
 
   return (
     <div className="stack">
-      <div className="subtabs">
+      <div className="modes" role="tablist" aria-label="研究方法">
         {[
-          ["chain", "① 骨牌推演"],
-          ["pipeline", "② 五步研究"],
-          ["nn", "③ 五关筛选"],
-        ].map(([k, l]) => (
-          <button key={k} className={`subtab ${mode === k ? "on" : ""}`} onClick={() => setMode(k)}>
-            {l}
+          ["chain", "骨牌推演", "一条新闻 → 一阶、二阶、三阶受益者", "1 次 AI"],
+          ["pipeline", "五步研究", "你在生活里看到的反常 → 有没有投资机会", "6 次 AI"],
+          ["nn", "五关筛选", "一个主题 → 谁最像下一个 Nvidia", "1 次 AI"],
+        ].map(([k, l, d, cost]) => (
+          <button key={k} role="tab" aria-selected={mode === k} className={`mode ${mode === k ? "on" : ""}`} onClick={() => setMode(k)}>
+            <b>{l}</b>
+            <span>{d}</span>
+            <small>{cost}</small>
           </button>
         ))}
       </div>

@@ -5,13 +5,13 @@ import { getUsage } from "../lib/ai";
 
 export function Priced({ v }) {
   if (!v) return null;
-  const map = { fresh: ["FRESH 未定价", "tag-fresh"], partly: ["PARTLY 部分定价", "tag-partly"], crowded: ["CROWDED 拥挤", "tag-crowded"] };
+  const map = { fresh: ["还没被定价", "tag-fresh"], partly: ["部分定价", "tag-partly"], crowded: ["已经拥挤", "tag-crowded"] };
   const [t, c] = map[v] || [v, ""];
   return <span className={`tag ${c}`}>{t}</span>;
 }
 
 export function Dir({ v }) {
-  return v === "bear" ? <span className="tag tag-bear">▼ BEAR</span> : <span className="tag tag-bull">▲ BULL</span>;
+  return v === "bear" ? <span className="tag tag-bear">▼ 利空</span> : <span className="tag tag-bull">▲ 利好</span>;
 }
 
 export function Gates({ g }) {
@@ -86,18 +86,18 @@ export function QuotaMeter() {
   const liteUsed = LITE_KEYS.reduce((a, k) => a + (u.counts[k] || 0), 0);
   const pct = (a, b) => Math.min(100, Math.round((a / b) * 100));
   return (
-    <div className="quota" onClick={() => setOpen(!open)} title="点击看明细">
+    <button className="quota" onClick={() => setOpen(!open)} title="今天剩下的 AI 额度，点击看明细" aria-expanded={open}>
       <div className="q-row">
-        <span>Flash</span>
+        <span>AI 额度 Flash</span>
         <div className="bar">
-          <b style={{ width: pct(flashUsed, 80) + "%" }} />
+          <b style={{ width: 100 - pct(flashUsed, 80) + "%" }} />
         </div>
         <span className="mono">{80 - flashUsed}/80</span>
       </div>
       <div className="q-row">
         <span>Lite</span>
         <div className="bar">
-          <b style={{ width: pct(liteUsed, 1000) + "%" }} />
+          <b style={{ width: 100 - pct(liteUsed, 1000) + "%" }} />
         </div>
         <span className="mono">{1000 - liteUsed}/1000</span>
       </div>
@@ -111,6 +111,6 @@ export function QuotaMeter() {
           <div className="dim">主力分析用 Flash（4 个模型各 20 次/天），用完自动降到 Flash-Lite（各 500 次/天）。新闻来自 Google News，不耗额度。额度在布里斯班时间约下午 5 点重置（太平洋时间午夜）。这里只统计这台设备的用量。</div>
         </div>
       )}
-    </div>
+    </button>
   );
 }

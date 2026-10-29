@@ -53,6 +53,124 @@ const LINKS = [
   ["DEX Screener", "https://dexscreener.com/solana"],
 ];
 
+
+const usd = (x) => {
+  if (!(x > 0)) return "—";
+  if (x >= 1e9) return `$${(x / 1e9).toFixed(2)}B`;
+  if (x >= 1e6) return `$${(x / 1e6).toFixed(1)}M`;
+  return `$${Math.round(x).toLocaleString()}`;
+};
+const price = (x) => (x >= 1000 ? x.toLocaleString("en-US", { maximumFractionDigits: 0 }) : x >= 1 ? x.toFixed(2) : x.toPrecision(3));
+const chg = (c) => (c == null ? "—" : `${c >= 0 ? "+" : ""}${(c * 100).toFixed(2)}%`);
+const dirCls = (c) => (c == null ? "" : c >= 0 ? "up" : "down");
+const shortName = (n) => n.replace(/^[a-z]+:/, "");
+
+// Hyperliquid 实时行情：HYPE 放大，BTC / ETH / SOL 小卡，24h 异动和 trade[XYZ] 最活跃的股票 / 大宗商品永续
+function HLPanel() {
+  const [d, setD] = useState(null);
+  const [err, setErr] = useState("");
+  useEffect(() => {
+    let alive = true;
+    const pull = () => {
+      if (document.hidden) return;
+      fetch("/api/hl-market")
+        .then((r) => r.json())
+        .then((j) => {
+          if (!alive) return;
+          if (j.error) setErr(j.error);
+          else {
+            setD(j);
+            setErr("");
+          }
+        })
+        .catch((e) => alive && setErr(e.message));
+    };
+    pull();
+    const t = setInterval(pull, 30000);
+    return () => {
+      alive = false;
+      clearInterval(t);
+    };
+  }, []);
+
+  const hype = d?.majors?.find((m) => m.name === "HYPE");
+  const others = d?.majors?.filter((m) => m.name !== "HYPE") || [];
+  return (
+    <section className="hl-panel">
+      <div className="hl-head">
+        <h3>Hyperliquid 盯盘</h3>
+        <span className="dim small">{d ? `每 30 秒更新，上次 ${new Date(d.at).toLocaleTimeString("en-AU", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : "载入中"}</span>
+      </div>
+      {err && <div className="dim small">{err}</div>}
+      {d && (
+        <div className="hl-grid">
+          {hype && (
+            <div className="hl-hero">
+              <div className="hl-sym">HYPE</div>
+              <div className="hl-price">${price(hype.px)}</div>
+              <div className={`hl-chg ${dirCls(hype.change)}`}>{chg(hype.change)} 24h</div>
+              <dl className="hl-stats">
+                <div>
+                  <dt>24h 成交额</dt>
+                  <dd>{usd(hype.volume)}</dd>
+                </div>
+                <div>
+                  <dt>未平仓量</dt>
+                  <dd>{usd(hype.oi)}</dd>
+                </div>
+                <div>
+                  <dt>资金费率 / 小时</dt>
+                  <dd>{hype.funding != null ? `${(hype.funding * 100).toFixed(4)}%` : "—"}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
+          <div className="hl-side">
+            <div className="hl-majors">
+              {others.map((m) => (
+                <div className="hl-mini" key={m.name}>
+                  <span className="hl-sym-s">{m.name}</span>
+                  <b>${price(m.px)}</b>
+                  <span className={`hl-chg ${dirCls(m.change)}`}>{chg(m.change)}</span>
+                </div>
+              ))}
+            </div>
+            <div className="hl-totals">
+              全平台 24h 成交额 <b>{usd(d.totalVolume)}</b>，未平仓量 <b>{usd(d.totalOi)}</b>
+            </div>
+            <div className="hl-lists">
+              <div>
+                <h4>24h 异动（成交额 &gt; $5M）</h4>
+                {d.movers.map((m) => (
+                  <div className="hl-line" key={m.name}>
+                    <span className="ticker">{m.name}</span>
+                    <span className="dim small">{usd(m.volume)}</span>
+                    <span className={`hl-chg ${dirCls(m.change)}`}>{chg(m.change)}</span>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <h4>trade[XYZ] 最活跃</h4>
+                {d.tradfi.length ? (
+                  d.tradfi.map((m) => (
+                    <div className="hl-line" key={m.name}>
+                      <span className="ticker">{shortName(m.name)}</span>
+                      <span className="dim small">{usd(m.volume)}</span>
+                      <span className={`hl-chg ${dirCls(m.change)}`}>{chg(m.change)}</span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="dim small">暂时读不到 trade[XYZ] 市场{d.tradfiError ? `（${d.tradfiError}）` : ""}</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function NewsBox() {
   const [topic, setTopic] = useState("asx");
   const [items, setItems] = useState(null);
@@ -76,7 +194,7 @@ function NewsBox() {
   return (
     <div className="card">
       <div className="card-head">
-        <h3>新闻 Headlines</h3>
+        <h3>新闻</h3>
         <div className="pills">
           {TOPICS.map(([k, l]) => (
             <button key={k} className={`pill ${topic === k ? "on" : ""}`} onClick={() => setTopic(k)}>
@@ -149,7 +267,7 @@ function Catalysts() {
             <span className="mono">{c.date}</span>
             <span>{c.title}</span>
             <a className="mini" href={gcalLink(c)} target="_blank" rel="noreferrer">
-              + Google Calendar
+              加到 Google Calendar
             </a>
             <button className="mini ghost" onClick={() => setList(list.filter((x) => x.id !== c.id))}>
               删除
@@ -165,6 +283,7 @@ function Catalysts() {
 export default function MorningBoard() {
   return (
     <div className="stack">
+      <HLPanel />
       <div className="card tight">
         <TVWidget
           src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"
@@ -176,7 +295,7 @@ export default function MorningBoard() {
         <NewsBox />
         <div className="card">
           <div className="card-head">
-            <h3>经济日历 Economic Calendar</h3>
+            <h3>经济日历</h3>
             <span className="dim">AU / US / CN</span>
           </div>
           <TVWidget
@@ -195,7 +314,7 @@ export default function MorningBoard() {
         <div className="links">
           {LINKS.map(([l, u]) => (
             <a key={u} href={u} target="_blank" rel="noreferrer" className="link-btn">
-              {l} ↗
+              {l}
             </a>
           ))}
         </div>

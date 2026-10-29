@@ -7,19 +7,24 @@ import Research from "../components/Research";
 import DecisionGate from "../components/DecisionGate";
 import Journal from "../components/Journal";
 import Review from "../components/Review";
+import MarketClock from "../components/MarketClock";
 import { QuotaMeter } from "../components/ui";
 import { load, save } from "../lib/store";
 
-// 前三个是「驾驶舱」：决定、复盘、记录。后四个是「雷达」：辅助找想法。
+// 主导航：每天看的四个页面
 const TABS = [
-  ["gate", "①", "Decision Gate", "下单前先过这道门", "core"],
-  ["review", "②", "复盘 Review", "真实成绩单 · 期望值", "core"],
-  ["journal", "③", "Journal", "记录每一笔", "core"],
-  ["brief", "④", "今日简报", "IPO · 异动 · 热点", "radar"],
-  ["board", "⑤", "Morning Board", "行情 · 日历 · 新闻", "radar"],
-  ["scan", "⑥", "Hot Scan", "今天研究什么", "radar"],
-  ["research", "⑦", "Research", "骨牌 · 五步 · 五关", "radar"],
+  ["brief", "今日简报", "开盘前和收盘后，一页看懂"],
+  ["board", "Morning Board", "行情、Hyperliquid、新闻、日历"],
+  ["scan", "Hot Scan", "今天值得研究什么"],
+  ["research", "Research", "骨牌、五步、五关"],
 ];
+// 交易工具：真的要下单时才用
+const TOOLS = [
+  ["gate", "Decision Gate"],
+  ["review", "复盘"],
+  ["journal", "Journal"],
+];
+const ALL = [...TABS.map((t) => t[0]), ...TOOLS.map((t) => t[0])];
 
 function PassPrompt({ onDone }) {
   const [v, setV] = useState("");
@@ -46,12 +51,14 @@ function PassPrompt({ onDone }) {
 }
 
 export default function Home() {
-  const [tab, setTab] = useState("review");
+  const [tab, setTab] = useState("brief");
   const [seed, setSeed] = useState(null);
   const [handoff, setHandoff] = useState(null);
   const [needPass, setNeedPass] = useState(false);
 
   useEffect(() => {
+    const last = load("tab", "brief");
+    if (ALL.includes(last)) setTab(last);
     const f = () => setNeedPass(true);
     window.addEventListener("sdp-auth", f);
     return () => window.removeEventListener("sdp-auth", f);
@@ -62,34 +69,46 @@ export default function Home() {
     save("tab", k);
     window.scrollTo({ top: 0 });
   };
+  const toolOpen = TOOLS.some(([k]) => k === tab);
 
   return (
     <div className="app">
-      <header>
+      <header className="masthead">
         <div className="brand">
-          <div className="logo">
+          <div className="logo" aria-hidden>
             <span />
             <span />
           </div>
           <div>
-            <h1>SIGNAL DESK PRO</h1>
-            <div className="dim small">决定 → 记录 → 复盘 · 雷达只是辅助</div>
+            <h1>Signal Desk</h1>
+            <div className="brand-sub">JingLiang 的交易研究台</div>
           </div>
         </div>
-        <QuotaMeter />
+        <MarketClock />
       </header>
 
-      <nav className="tabs">
-        {TABS.map(([k, n, l, s, kind]) => (
-          <button key={k} className={`tab ${kind} ${tab === k ? "on" : ""}`} onClick={() => go(k)}>
-            <span className="mono">{n}</span>
-            <b>{l}</b>
-            <small>{s}</small>
-          </button>
-        ))}
+      <nav className="nav" aria-label="页面">
+        <div className="tabs">
+          {TABS.map(([k, l, s]) => (
+            <button key={k} className={`tab ${tab === k ? "on" : ""}`} aria-current={tab === k ? "page" : undefined} onClick={() => go(k)}>
+              <b>{l}</b>
+              <small>{s}</small>
+            </button>
+          ))}
+        </div>
+        <div className="toolbar">
+          <span className="toolbar-label">交易工具</span>
+          {TOOLS.map(([k, l]) => (
+            <button key={k} className={`tool ${tab === k ? "on" : ""}`} aria-current={tab === k ? "page" : undefined} onClick={() => go(k)}>
+              {l}
+            </button>
+          ))}
+          <span style={{ flex: 1 }} />
+          <QuotaMeter />
+        </div>
       </nav>
 
-      <main>
+      <main className={toolOpen ? "tools-mode" : ""}>
         <section style={{ display: tab === "brief" ? "block" : "none" }}>
           <DailyBrief
             onMap={(text) => {
@@ -121,11 +140,11 @@ export default function Home() {
         <section style={{ display: tab === "gate" ? "block" : "none" }}>
           <DecisionGate handoff={handoff} onRecorded={() => go("journal")} />
         </section>
-        <section style={{ display: tab === "journal" ? "block" : "none" }}>
-          <Journal />
-        </section>
         <section style={{ display: tab === "review" ? "block" : "none" }}>
           <Review />
+        </section>
+        <section style={{ display: tab === "journal" ? "block" : "none" }}>
+          <Journal />
         </section>
       </main>
 

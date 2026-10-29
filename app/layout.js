@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "Signal Desk Pro",
-  description: "发现 → 研究 → 决定 → 复盘 · 个人交易研究台",
+  description: "JingLiang 的交易研究台：今日简报、行情、热点和研究",
 };
 
 export const viewport = { width: "device-width", initialScale: 1, themeColor: "#000000" };
@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=Space+Grotesk:wght@600;700&family=Noto+Sans+SC:wght@500;600;700;900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@500;600&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
           rel="stylesheet"
         />
         <link
