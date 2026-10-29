@@ -6,24 +6,20 @@
 
 整套运行成本 **$0**：Vercel Hobby（免费）+ Gemini API 免费层 + 浏览器本地存储。
 
-## 七个 tab
+## 页面
 
-**驾驶舱（核心）**
+**每天看的四个页面（主导航）**
 
-| Tab | 做什么 | 耗 AI 额度？ |
+| 页面 | 做什么 | 耗 AI 额度？ |
 |---|---|---|
-| ① Decision Gate — 资金锁定、单笔最多亏 %（按止损距离自动算最多能买多少）、想法来源、三句 thesis、证伪、止损、60 秒冷静期 | 下单前先过这道门 | 不耗 |
-| ② 复盘 Review — Hyperliquid 钱包自动同步（只读公开地址），算期望值 / 胜率 / 盈亏比 / 打平所需胜率 / 最大回撤，按想法来源（自己研究 / 跟 X / AI / 冲动…）拆开看，近 7 / 30 / 90 天 | 真实成绩单 | 不耗 |
-| ③ Journal — ASX / US / Crypto 手动记录、R 倍数、复盘、备份 | 记录每一笔 | 不耗 |
+| 今日简报 — 头条和市场情绪、ASX 异动与放量、IPO 雷达（ASX 官方名单 + 倒数天数）、政治与战争、Crypto 与 Hyperliquid、二阶热点、接下来要盯；每天约 6:30am / 4:45pm 自动生成 | 一页看懂今天 | 每份 1 Flash + 1 Flash-Lite |
+| Morning Board — Hyperliquid 实时盯盘（HYPE、BTC/ETH/SOL、24h 异动、trade[XYZ] 最活跃的股票和大宗商品永续，每 30 秒更新）、TradingView 行情条、新闻、经济日历、Catalyst 日历、快速链接 | 行情和日历 | 不耗 |
+| Hot Scan — 全球热点按二阶效应潜力排名 | 今天研究什么 | 1 次 |
+| Research — 骨牌推演 / Leto Bao 五步 / Next Nvidia 五关 | 深入研究 | 1–6 次 |
 
-**雷达（辅助）**
+顶部是交易所时钟：ASX（布里斯班时间）、纽约、Hyperliquid 24/7，显示开收盘倒数，夏令时自动处理。
 
-| Tab | 来源 | 耗 AI 额度？ |
-|---|---|---|
-| ④ 今日简报 — 政治/战争、ASX 热股与放量、IPO 雷达、热点、接下来要盯；每天约 6:30am / 4:45pm 自动生成 | 新增 | 每份 1 Flash + 1 Flash-Lite |
-| ⑤ Morning Board — 行情、经济日历、新闻、catalyst 日历、快速链接 | Global Signal Deck | 不耗 |
-| ⑥ Hot Scan — 全球热点，按二阶效应潜力排序 | Domino Desk | 1 次搜索 |
-| ⑦ Research — 骨牌推演 / Leto Bao 五步 / Next Nvidia 五关 | 两者合并 | 骨牌 1 搜索；五步 3 搜索 + 3 推理；五关 1 搜索 |
+**交易工具**（真的要下单时才用，放在导航下方的小按钮里）：Decision Gate、复盘（Hyperliquid 钱包同步 + 期望值）、Journal。数据都还在，只是不占主导航。
 
 ### Hyperliquid 同步怎么算
 
