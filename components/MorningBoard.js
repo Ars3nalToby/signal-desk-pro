@@ -2,6 +2,7 @@
 // ① Morning Board — 来自 Global Signal Deck。完全不耗 AI 额度。
 import { useEffect, useRef, useState } from "react";
 import { usePersist, uid } from "../lib/store";
+import JensenTracker from "./JensenTracker";
 
 function TVWidget({ src, config, height }) {
   const ref = useRef(null);
@@ -284,6 +285,7 @@ export default function MorningBoard() {
   return (
     <div className="stack">
       <HLPanel />
+      <JensenTracker />
       <div className="card tight">
         <TVWidget
           src="https://s3.tradingview.com/external-embedding/embed-widget-ticker-tape.js"

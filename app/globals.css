@@ -282,6 +282,30 @@ details summary { cursor: pointer; }
 .conviction b { font-family: var(--display); font-size: 48px; font-weight: 900; color: var(--amber); }
 .cta { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; border-color: var(--amber); }
 
+/* ───── Jensen Huang Tracker（只有这张卡用 NVIDIA 绿）───── */
+.nv-card { --nv: #76b900; border: 1px solid #76b90055; border-radius: var(--r-lg); background: radial-gradient(90% 120% at 0% 0%, #142200 0%, var(--panel) 52%); padding: 18px 20px; display: grid; gap: 14px; position: relative; overflow: hidden; }
+.nv-card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: var(--nv); }
+.nv-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.nv-head h3 { font-size: 22px; font-weight: 900; font-stretch: 85%; }
+.nv-tag { font-family: var(--mono); font-weight: 600; color: #0b1400; background: var(--nv); border-radius: 6px; padding: 2px 9px; font-size: 13px; }
+.nv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.nv-feed { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.nv-feed-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; border-bottom: 2px solid var(--nv); padding-bottom: 6px; }
+.nv-feed-head h4 { font-size: 16px; font-weight: 800; }
+.nv-list { list-style: none; margin: 0; padding: 0; display: grid; }
+.nv-list li { display: grid; gap: 2px; padding: 9px 0; border-top: 1px solid var(--line); }
+.nv-list li:first-child { border-top: none; }
+.nv-list a { color: var(--ink); text-decoration: none; font-weight: 700; line-height: 1.45; }
+.nv-list li:first-child a { font-size: 16.5px; font-weight: 800; }
+.nv-list a:hover { color: var(--nv); }
+.nv-meta { display: flex; gap: 10px; font-size: 12.5px; color: var(--faint); }
+.nv-meta span:first-child { color: var(--nv); font-weight: 600; }
+.nv-empty { font-size: 13.5px; color: var(--dim); padding: 10px 12px; border: 1px dashed var(--line2); border-radius: var(--r-sm); display: grid; gap: 4px; }
+.nv-empty a { color: var(--nv); }
+.nv-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.nv-links a { color: var(--ink); text-decoration: none; font-size: 13.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px; border: 1px solid #76b90066; background: #76b90012; }
+.nv-links a:hover { border-color: var(--nv); color: var(--nv); }
+
 /* ───── Live Wire ───── */
 .wire-top { display: grid; grid-template-columns: 1.55fr 1fr; gap: 14px; }
 .wire-lead { position: relative; padding: 24px 26px; border-radius: var(--r-lg); border: 1px solid var(--line); background: radial-gradient(120% 140% at 0% 0%, #1d1406 0%, var(--panel) 48%); display: grid; gap: 8px; align-content: start; }
@@ -362,7 +386,7 @@ footer { margin-top: 30px; text-align: center; }
   .fronts { columns: 1; }
 }
 @media (max-width: 960px) {
-  .brief-grid, .hl-grid, .wire-top, .wire-grid { grid-template-columns: 1fr; }
+  .brief-grid, .hl-grid, .wire-top, .wire-grid, .nv-grid { grid-template-columns: 1fr; }
   .wire-stream { position: static; max-height: 70vh; }
   .clocks { max-width: none; flex-basis: 100%; }
 }
@@ -377,6 +401,8 @@ footer { margin-top: 30px; text-align: center; }
   .clock-time { font-size: 26px; }
   .clock-note { white-space: normal; font-size: 11px; }
   .hl-price { font-size: 52px; }
+  .nv-card { padding: 16px 14px 16px 18px; }
+  .nv-links a { flex: 1 1 calc(50% - 8px); text-align: center; }
   .hl-majors { grid-template-columns: repeat(3, 1fr); }
   .quota { min-width: 0; width: 100%; }
   .hero { padding: 20px 18px 18px 24px; }
